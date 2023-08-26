@@ -22,53 +22,48 @@
     <ul class="list-group list-group-horizontal text-danger justify-content-end font-weight-bold">
         <li class="list-group-item bg-white" id="lnkHome"><a href="../index.html">Home</a></li>
         <li class="list-group-item bg-danger text-white" id="lnkCustomer"><a class="text-white"
-                                                                             href="/jsonp/pages/customer">Customer</a>
+                                                                             href="customer.html">Customer</a>
         </li>
-        <li class="list-group-item bg-white" id="lnkItem"><a href="pages/item">Item</a></li>
+        <li class="list-group-item bg-white" id="lnkItem"><a href="item.html">Item</a></li>
         <li class="list-group-item bg-white" id="lnkOrders"><a href="purchase-order.html">Orders</a></li>
     </ul>
 </header>
-
 <!--customer content-->
 <main class="container-fluid" id="customerContent">
     <section class="row">
         <div class="col-12 col-lg-4">
             <h1>Customer Registration</h1>
-            <form id="customerForm">
+            <form id="CustomerForm">
                 <div class="form-group">
                     <label for="txtCustomerID">Customer ID</label>
-                    <input name="cusID" class="form-control" id="txtCustomerID" type="text">
+                    <input class="form-control" id="txtCustomerID" required type="text" name="id">
                     <span class="control-error" id="lblcusid"></span>
                 </div>
                 <div class="form-group">
                     <label for="txtCustomerName">Customer Name</label>
-                    <input name="cusName" class="form-control" id="txtCustomerName" type="text">
+                    <input class="form-control" id="txtCustomerName" type="text" name="name">
                     <span class="control-error" id="lblcusname"></span>
                 </div>
                 <div class="form-group">
                     <label for="txtCustomerAddress">Customer Address</label>
-                    <input name="cusAddress" class="form-control" id="txtCustomerAddress" type="text">
+                    <input class="form-control" id="txtCustomerAddress" type="text" name="address">
                     <span class="control-error" id="lblcusaddress"></span>
                 </div>
                 <div class="form-group">
                     <label for="txtCustomerSalary">Customer Salary</label>
-                    <input name="cusSalary" class="form-control" id="txtCustomerSalary" type="text">
+                    <input class="form-control" id="txtCustomerSalary" type="text" name="salary">
                     <span class="control-error" id="lblcussalary"></span>
                 </div>
-                <div class="btn-group">
-                    <button  type="button" class="btn btn-primary" id="btnCustomer">
-                        Save Customer
-                    </button>
-                    <button  type="button" class="btn btn-danger"
-                            id="btnCusDelete">Remove
-                    </button>
-                    <button  type="button" class="btn btn-warning"
-                            id="btnUpdate">Update
-                    </button>
-                    <button type="button" class="btn btn-success" id="btnGetAll">Get All</button>
-                    <button  type="button" class="btn btn-danger" id="btn-clear1">Clear All</button>
-                </div>
             </form>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" type="button" id="btnCustomer">Save Customer</button>
+                <button class="btn btn-danger" type="button" id="btnCusDelete">Remove</button>
+                <button class="btn btn-warning" type="button" id="btnUpdate">Update</button>
+                <button class="btn btn-success" type="button" id="btnGetAll">Get All</button>
+                <button class="btn btn-danger" id="btn-clear1">Clear All</button>
+            </div>
+
         </div>
         <div class="col-12 col-lg-8 mt-3">
             <table class="table table-bordered table-hover">
@@ -82,6 +77,12 @@
                 </thead>
                 <tbody id="tblCustomer">
 
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -92,108 +93,134 @@
 <script src="../assets/js/jquery-3.6.1.min.js"></script>
 <script src="../assets/js/bootstrap.min.js"></script>
 
-
-    <!--btn GetAll btn-->
 <script>
-    getAllCustomers();
-    $("#btnGetAll").click(function () {
-        getAllCustomers();
-    });
-    function getAllCustomers() {
-        $("#tblCustomer").empty();
-        $.ajax({
-            url: 'customer',
-            dataType: "json",
-            success: function (customers) {
-                for (let i in customers) {
-                    let cus = customers[i];
-                    let id = cus.id;
-                    let name = cus.name;
-                    let address = cus.address;
-                    let salary = cus.salary;
-                    let row = `<tr><td>${id}</td><td>${name}</td><td>${address}</td><td>${salary}</td></tr>`;
-                    $("#tblCustomer").append(row);
-                }
-                bindRowClickEvents();
-            },
-            error: function (error) {
-                console.log(error);
-            }
-        });
-    }
+    let baseUrl="http://localhost:8081/posApp/";
 
-    <!--btn Add btn-->
-    $("#btnCustomer").click(function (){
-        let formData=$("#customerForm").serialize();
+    //load all customers from database
+    getAllCustomers();
+
+    //Button events
+    // add Customer
+    $("#btnCustomer").click(function () {
+        let formData = $("#CustomerForm").serialize();
         $.ajax({
-            url:"customer?option=add",
-            method:"post",
-            data:formData,
-            success:function (res){
+            url: baseUrl+"Customer",
+            method: "post",
+            data: formData,
+            dataType: "json",
+            success: function (res) {
+                console.log("success Method Invoked");
                 console.log(res);
                 alert(res.message);
                 getAllCustomers();
             },
-            error:function (error){
-                console.log(error.responseJSON);
-                alert(error.responseJSON.message);
+            error: function (error) {
+                console.log("Error Method Invoked");
+                console.log(JSON.parse(error.responseText));
+                alert(JSON.parse(error.responseText).message);
             }
         });
     });
 
-    <!--btn Delete btn-->
-    $("#btnCusDelete").click(function(){
-        let  id=$("#txtCustomerID").val();
+    //delete customer
+    $("#btnCusDelete").click(function () {
+        let id = $("#txtCustomerID").val();
         $.ajax({
-            url:'customer?id='+id,
-            method:'DELETE',
-
-            success:function (resp){
-                console.log(resp);
+            url: baseUrl+"Customer?cusID=" + id,
+            method: "delete",
+            success: function (resp) {
+                getAllCustomers();
                 alert(resp.message);
-                getAllCustomers();
             },
-            error:function (error){
-                console.log(error.responseJSON);
-                alert(error.responseJSON.message);
+            error: function (error) {
+                let message = JSON.parse(error.responseText).message;
+                alert(message);
             }
         });
     });
 
-    <!--btn Update btn-->
-    $("#btnUpdate").click(function (){
-        let formData=$("#customerForm").serialize();
-        $.ajax({
-            url:'customer?option=update',
-            method:'post',
-            data:formData,
-            success:function (resp){
-                getAllCustomers();
-            }
-        });
-    });
+    //update customer
     $("#btnUpdate").click(function () {
-        let cusId = $("#txtCustomerID").val();
-        let cusName = $("#txtCustomerName").val();
-        let cusAddress = $("#txtCustomerAddress").val();
-        let cusSalary=$("#txtCustomerSalary").val();
-
+        let cusId = $('#txtCustomerID').val();
+        let cusName = $('#txtCustomerName').val();
+        let cusAddress = $('#txtCustomerAddress').val();
+        let cusSalary = $('#txtCustomerSalary').val();
+        var customerOb = {
+            id: cusId,
+            name: cusName,
+            address: cusAddress,
+            salary: cusSalary
+        }
         $.ajax({
-            url:'customer?id='+cusId+'&name='+cusName+'&address='+cusAddress+'&salary='+cusSalary,
-            method:'PUT',
-            success:function (res) {
-                alert("Customer Updated Succus");
-                getAllCustomer();
+            url: baseUrl+"Customer",
+            method: "put",
+            contentType: "application/json",
+            data: JSON.stringify(customerOb),
+            dataType: "json",
+            success: function (resp) {
+                getAllCustomers();
+                alert(resp.message);
             },
-            error:function (err) {
-                alert(e.responseJSON.massage);
+            error: function (error) {
+                let message = JSON.parse(error.responseText).message;
+                alert(message);
             }
         });
     });
+
+    //getAll customer
+    $("#btnGetAll").click(function () {
+        getAllCustomers();
+    });
+
+    //getAll customer function
+    function getAllCustomers() {
+        $("#tblCustomer").empty();
+        $.ajax({
+            url: baseUrl+"Customer",
+            success: function (res) {
+                for (let c of res.data) {
+                    let cusID = c.id;
+                    let cusName = c.name;
+                    let cusAddress = c.address;
+                    let cusSalary = c.salary;
+
+                    let row = "<tr><td>" + cusID + "</td><td>" + cusName + "</td><td>" + cusAddress + "</td><td>" + cusSalary + "</td></tr>";
+                    $("#tblCustomer").append(row);
+                }
+                bindRowClickEvents();
+                setTextFieldValues("", "", "", "");
+            },
+            error: function (error) {
+                let message = JSON.parse(error.responseText).message;
+                alert(message);
+            }
+        });
+    }
+
+    //bind events for the table rows function
+    function bindRowClickEvents() {
+        $("#tblCustomer>tr").click(function () {
+            let id = $(this).children(":eq(0)").text();
+            let name = $(this).children(":eq(1)").text();
+            let address = $(this).children(":eq(2)").text();
+            let salary = $(this).children(":eq(3)").text();
+
+            $('#txtCustomerID').val(id);
+            $('#txtCustomerName').val(name);
+            $('#txtCustomerAddress').val(address);
+            $('#txtCustomerSalary').val(salary);
+        });
+    }
+
+    //set text fields values function
+    function setTextFieldValues(id, name, address, salary) {
+        $('#txtCustomerID').val(id);
+        $('#txtCustomerName').val(name);
+        $('#txtCustomerAddress').val(address);
+        $('#txtCustomerSalary').val(salary);
+    }
+
 </script>
-
-<!--when the response received catch it and set it to the table-->
-
-
 </body>
 </html>
