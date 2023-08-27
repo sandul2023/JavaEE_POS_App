@@ -22,14 +22,15 @@ public class CustomerServlet extends HttpServlet {
 
             while (rst.next()) {
                 JsonObjectBuilder customer = Json.createObjectBuilder();
-                customer.add("cusID", rst.getString("cusID"));
-                customer.add("cusName", rst.getString("cusName"));
-                customer.add("cusAddress", rst.getString("cusAddress"));
-                customer.add("cusSalary", rst.getDouble("cusSalary"));
+                customer.add("id", rst.getString("id"));
+                customer.add("name", rst.getString("name"));
+                customer.add("address", rst.getString("address"));
+                customer.add("salary", rst.getDouble("salary"));
                 allCustomers.add(customer.build());
             }
             resp.addHeader("Content-Type","application/json");
             resp.addHeader("Access-Control-Allow-Origin","*");
+
 
             JsonObjectBuilder job = Json.createObjectBuilder();
             job.add("state","OK");
@@ -51,10 +52,10 @@ public class CustomerServlet extends HttpServlet {
 //    JSON
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String cusID = req.getParameter("cusID");
-        String cusName = req.getParameter("cusName");
-        String cusAddress = req.getParameter("cusAddress");
-        String cusSalary = req.getParameter("cusSalary");
+        String id = req.getParameter("id");
+        String name = req.getParameter("name");
+        String address = req.getParameter("address");
+        String salary = req.getParameter("salary");
         resp.addHeader("Access-Control-Allow-Origin","*");
 
         try {
@@ -62,10 +63,10 @@ public class CustomerServlet extends HttpServlet {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ajaxjson", "root", "1234");
 
             PreparedStatement pstm = connection.prepareStatement("insert into Customer values(?,?,?,?)");
-            pstm.setObject(1,cusID);
-            pstm.setObject(2,cusName);
-            pstm.setObject(3,cusAddress);
-            pstm.setObject(4,cusSalary);
+            pstm.setObject(1,id);
+            pstm.setObject(2,name);
+            pstm.setObject(3,address);
+            pstm.setObject(4,salary);
             boolean b = pstm.executeUpdate() > 0;
             if (b){
                 JsonObjectBuilder responseObject = Json.createObjectBuilder();
@@ -97,14 +98,14 @@ public class CustomerServlet extends HttpServlet {
 //    JSON
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String cusID = req.getParameter("cusID");
+        String id = req.getParameter("id");
         resp.setContentType("application/json");
         resp.addHeader("Access-Control-Allow-Origin","*");
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ajaxjson", "root", "1234");
-            PreparedStatement pstm = connection.prepareStatement("delete from Customer where cusID=?");
-            pstm.setObject(1,cusID);
+            PreparedStatement pstm = connection.prepareStatement("delete from Customer where id=?");
+            pstm.setObject(1,id);
             boolean b = pstm.executeUpdate() > 0;
             if (b) {
                 JsonObjectBuilder rjo = Json.createObjectBuilder();
@@ -135,23 +136,22 @@ public class CustomerServlet extends HttpServlet {
     //    query string
 //    JSON
     @Override
-
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         JsonReader reader = Json.createReader(req.getReader());
         JsonObject customer = reader.readObject();
-        String cusID = customer.getString("cusID");
-        String cusName = customer.getString("cusName");
-        String cusAddress = customer.getString("cusAddress");
-        String cusSalary = customer.getString("cusSalary");
+        String id = customer.getString("id");
+        String name = customer.getString("name");
+        String address = customer.getString("address");
+        String salary = customer.getString("salary");
         resp.addHeader("Access-Control-Allow-Origin","*");
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ajaxjson", "root", "1234");
-            PreparedStatement pstm = connection.prepareStatement("update Customer set cusName=?,cusAddress=?,cusSalary=? where cusID=?");
-            pstm.setObject(4,cusID);
-            pstm.setObject(1,cusName);
-            pstm.setObject(2,cusAddress);
-            pstm.setObject(3,cusSalary);
+            PreparedStatement pstm = connection.prepareStatement("update Customer set name=?,address=?,salary=? where id=?");
+            pstm.setObject(4,id);
+            pstm.setObject(1,name);
+            pstm.setObject(2,address);
+            pstm.setObject(3,salary);
             boolean b = pstm.executeUpdate() > 0;
             if (b){
                 JsonObjectBuilder responseObject = Json.createObjectBuilder();
@@ -179,6 +179,7 @@ public class CustomerServlet extends HttpServlet {
             resp.getWriter().print(rjo.build());
         }
     }
+
 
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
